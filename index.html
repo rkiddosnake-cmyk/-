@@ -1,0 +1,1213 @@
+<title>国試単語帳</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #f2f5f4;
+    --surface: #ffffff;
+    --surface-alt: #e8edeb;
+    --text: #182523;
+    --text-muted: #5c6d69;
+    --border: #d7ddda;
+    --accent: #2f6f63;
+    --accent-strong: #204d44;
+    --accent-soft: #dcece6;
+    --accent-contrast: #fbfdfc;
+    --learned: #3d8361;
+    --learned-soft: #e0f0e6;
+    --pending: #a8712f;
+    --pending-soft: #f3e6d3;
+    --danger: #a83f3f;
+    --danger-soft: #f6e2e2;
+    --danger-strong: #7c2b2b;
+    --shadow: 0 12px 28px -18px rgba(15, 30, 27, 0.45);
+    --radius-card: 22px;
+    --radius-control: 14px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e1614;
+      --surface: #16211e;
+      --surface-alt: #1d2a26;
+      --text: #e8efec;
+      --text-muted: #93a6a0;
+      --border: #2a3934;
+      --accent: #5fbfa8;
+      --accent-strong: #86d6c1;
+      --accent-soft: #1e3a34;
+      --accent-contrast: #06110d;
+      --learned: #6fcb94;
+      --learned-soft: #1d3327;
+      --pending: #e0a659;
+      --pending-soft: #3a2c18;
+      --danger: #e08080;
+      --danger-soft: #3a2020;
+      --danger-strong: #f2b3b3;
+      --shadow: 0 16px 32px -18px rgba(0, 0, 0, 0.6);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0e1614;
+    --surface: #16211e;
+    --surface-alt: #1d2a26;
+    --text: #e8efec;
+    --text-muted: #93a6a0;
+    --border: #2a3934;
+    --accent: #5fbfa8;
+    --accent-strong: #86d6c1;
+    --accent-soft: #1e3a34;
+    --accent-contrast: #06110d;
+    --learned: #6fcb94;
+    --learned-soft: #1d3327;
+    --pending: #e0a659;
+    --pending-soft: #3a2c18;
+    --danger: #e08080;
+    --danger-soft: #3a2020;
+    --danger-strong: #f2b3b3;
+    --shadow: 0 16px 32px -18px rgba(0, 0, 0, 0.6);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+  }
+
+  .app-shell {
+    width: 100%;
+    max-width: 448px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 14px 16px 28px;
+    gap: 14px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 2px 2px 0;
+  }
+
+  .brand-title {
+    font-family: "Shippori Mincho", serif;
+    font-weight: 700;
+    font-size: 21px;
+    letter-spacing: 0.02em;
+    margin: 0;
+  }
+
+  .brand-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+  }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .status-dot.ok { background: var(--learned); }
+  .status-dot.warn { background: var(--pending); }
+  .status-dot.bad { background: var(--danger); }
+
+  .progress-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .progress-row strong {
+    font-family: "Shippori Mincho", serif;
+    font-size: 20px;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .progress-track {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--surface-alt);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+    border-radius: 999px;
+    transition: width 0.35s ease;
+  }
+
+  .mode-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    background: var(--surface-alt);
+    padding: 4px;
+    border-radius: var(--radius-control);
+  }
+
+  .mode-tab {
+    border: none;
+    background: transparent;
+    padding: 9px 4px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  .mode-tab.active {
+    background: var(--surface);
+    color: var(--accent-strong);
+    box-shadow: var(--shadow);
+    font-weight: 700;
+  }
+
+  .chip-row {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 2px 2px 6px;
+    scrollbar-width: none;
+  }
+  .chip-row::-webkit-scrollbar { display: none; }
+
+  .chip {
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .chip.active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent-strong);
+    font-weight: 700;
+  }
+
+  .stage {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 0;
+  }
+
+  .card-scene {
+    perspective: 1400px;
+    flex: 1;
+    min-height: 300px;
+  }
+
+  .card-flip {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(.25,.8,.35,1);
+    cursor: pointer;
+  }
+  .card-flip.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border-radius: var(--radius-card);
+    padding: 26px 24px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+
+  .card-front {
+    background: var(--surface);
+  }
+
+  .card-back {
+    background: var(--accent-soft);
+    transform: rotateY(180deg);
+    border-color: var(--accent);
+  }
+
+  .card-eyebrow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+  }
+
+  .card-tag {
+    background: var(--surface-alt);
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 700;
+    color: var(--accent-strong);
+  }
+
+  .card-back .card-tag { background: rgba(255,255,255,0.5); }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+
+  .card-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px 4px;
+  }
+
+  .card-text {
+    font-family: "Shippori Mincho", serif;
+    font-size: 21px;
+    line-height: 1.6;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .card-hint {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .learned-badge {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: var(--learned-soft);
+    color: var(--learned);
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+  }
+
+  .judge-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .judge-btn {
+    border: none;
+    border-radius: var(--radius-control);
+    padding: 15px 8px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .judge-btn.pending {
+    background: var(--pending-soft);
+    color: var(--pending);
+  }
+
+  .judge-btn.learned {
+    background: var(--learned);
+    color: var(--accent-contrast);
+  }
+
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .icon-btn {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .deck-position {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+    color: var(--text-muted);
+    padding: 30px 20px;
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-card);
+    min-height: 300px;
+  }
+
+  .empty-state .big { font-family: "Shippori Mincho", serif; font-size: 18px; color: var(--text); }
+
+  .footer-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  .ghost-btn {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: var(--radius-control);
+    padding: 11px 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .ghost-btn .glyph { font-size: 16px; }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 18, 16, 0.55);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 40;
+    padding: 0;
+  }
+
+  .modal-sheet {
+    width: 100%;
+    max-width: 448px;
+    background: var(--surface);
+    border-radius: 22px 22px 0 0;
+    padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-height: 88vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow);
+    animation: sheet-up 0.25s ease;
+  }
+
+  @keyframes sheet-up {
+    from { transform: translateY(16px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-title {
+    font-family: "Shippori Mincho", serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .modal-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .field-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  select, textarea, input[type="text"] {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: var(--surface-alt);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+  }
+  textarea:focus, select:focus, input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .code-box {
+    font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    word-break: break-all;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    max-height: 140px;
+    overflow-y: auto;
+  }
+
+  .primary-btn {
+    border: none;
+    background: var(--accent);
+    color: var(--accent-contrast);
+    border-radius: var(--radius-control);
+    padding: 13px;
+    font-size: 14.5px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .primary-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .secondary-btn {
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    border-radius: var(--radius-control);
+    padding: 13px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  .danger-btn {
+    border: none;
+    background: var(--danger);
+    color: var(--accent-contrast);
+    border-radius: var(--radius-control);
+    padding: 13px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  .btn-row { display: flex; gap: 10px; }
+  .btn-row > * { flex: 1; }
+
+  .toast {
+    position: fixed;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent-strong);
+    color: var(--accent-contrast);
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: var(--shadow);
+    z-index: 60;
+  }
+
+  .mode-banner {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background: var(--pending-soft);
+    border: 1px solid var(--pending);
+    color: var(--text);
+    border-radius: var(--radius-control);
+    padding: 12px 14px;
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+  .mode-banner .glyph { font-size: 16px; flex-shrink: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card-flip, .modal-sheet, .progress-fill { transition: none; animation: none; }
+  }
+</style>
+
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.7/babel.min.js"></script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
+
+/* ---------------------------------------------------------------
+   Preset data. IDs are permanent: seed_0..seed_30, imm_0..imm_49.
+   Never renumber existing ids; append new preset cards at the end.
+---------------------------------------------------------------- */
+const PRESET_CARDS = [
+  { id: "seed_0", category: "解剖生理", front: "心臓の4つの部屋の名称は?", back: "右心房・右心室・左心房・左心室" },
+  { id: "seed_1", category: "解剖生理", front: "ネフロンを構成する2つの主要部分は?", back: "腎小体(糸球体+ボウマン嚢)と尿細管" },
+  { id: "seed_2", category: "解剖生理", front: "成人の安静時1回換気量はおよそ何mLか?", back: "約500mL" },
+  { id: "seed_3", category: "解剖生理", front: "副交感神経が優位になると心拍数はどうなるか?", back: "低下する(徐脈になる)" },
+  { id: "seed_4", category: "バイタル", front: "成人の正常体温の目安(腋窩)は?", back: "36.0〜37.0℃前後" },
+  { id: "seed_5", category: "バイタル", front: "成人の正常呼吸数の範囲は?", back: "12〜20回/分" },
+  { id: "seed_6", category: "バイタル", front: "成人の正常脈拍数の範囲は?", back: "60〜100回/分" },
+  { id: "seed_7", category: "検査値", front: "空腹時血糖の正常値の目安は?", back: "70〜109mg/dL(110〜125は境界型)" },
+  { id: "seed_8", category: "検査値", front: "糖尿病の診断基準となるHbA1cの値は?", back: "6.5%以上" },
+  { id: "seed_9", category: "検査値", front: "成人男性のHb(ヘモグロビン)基準値の目安は?", back: "約13.5〜17.5g/dL" },
+  { id: "seed_10", category: "検査値", front: "CRPが上昇する主な原因は?", back: "体内の炎症・感染などの急性期反応" },
+  { id: "seed_11", category: "疾病", front: "くも膜下出血の代表的な初発症状は?", back: "突然発症する激しい頭痛(バットで殴られたような頭痛)" },
+  { id: "seed_12", category: "疾病", front: "心筋梗塞で上昇する代表的な心筋逸脱酵素は?", back: "CK(CK-MB)、トロポニン" },
+  { id: "seed_13", category: "疾病", front: "COPDに特徴的な呼吸様式は?", back: "口すぼめ呼吸" },
+  { id: "seed_14", category: "薬理", front: "ジギタリス中毒で特徴的な視覚症状は?", back: "黄視症・緑視症などの色覚異常" },
+  { id: "seed_15", category: "薬理", front: "インスリン投与で最も注意すべき副作用は?", back: "低血糖" },
+  { id: "seed_16", category: "薬理", front: "モルヒネの三大副作用は?", back: "便秘・悪心嘔吐・呼吸抑制" },
+  { id: "seed_17", category: "感染対策", front: "標準予防策(スタンダードプリコーション)の基本的な考え方は?", back: "すべての患者の血液・体液・排泄物等を感染性があるものとして扱う" },
+  { id: "seed_18", category: "感染対策", front: "結核の感染経路と必要な予防策は?", back: "空気感染。陰圧個室とN95マスクによる空気予防策" },
+  { id: "seed_19", category: "感染対策", front: "MRSAの主な感染経路と対策は?", back: "接触感染。手指衛生と個人防護具による接触予防策" },
+  { id: "seed_20", category: "社会保障", front: "介護保険の第1号被保険者の年齢は?", back: "65歳以上" },
+  { id: "seed_21", category: "社会保障", front: "75歳以上が加入する医療保険制度は?", back: "後期高齢者医療制度" },
+  { id: "seed_22", category: "社会保障", front: "生活保護のうち医療に関する扶助は?", back: "医療扶助" },
+  { id: "seed_23", category: "母性", front: "分娩第1期とは?", back: "陣痛開始から子宮口全開大までの期間" },
+  { id: "seed_24", category: "母性", front: "悪露の色調変化の順序は?", back: "赤色悪露→褐色悪露→黄色悪露→白色悪露" },
+  { id: "seed_25", category: "母性", front: "新生児の生理的黄疸が出現しやすい時期は?", back: "生後2〜3日頃(通常1週間程度で消退)" },
+  { id: "seed_26", category: "精神", front: "統合失調症の陽性症状の例は?", back: "幻覚・妄想" },
+  { id: "seed_27", category: "精神", front: "統合失調症の陰性症状の例は?", back: "感情の平板化・意欲低下・自閉" },
+  { id: "seed_28", category: "精神", front: "リチウム中毒の初期症状は?", back: "振戦・悪心嘔吐・下痢など(治療域が狭く血中濃度モニタリングが必要)" },
+  { id: "seed_29", category: "老年", front: "高齢者のポリファーマシーとは?", back: "多剤併用により有害事象のリスクが高まっている状態" },
+  { id: "seed_30", category: "老年", front: "高齢者の転倒予防で重要な評価は?", back: "起立性低血圧の有無、下肢筋力、歩行状態の評価" },
+
+  { id: "imm_0", category: "免疫・アレルギー", front: "自然免疫を担う代表的な細胞は?", back: "好中球・マクロファージ・NK細胞など" },
+  { id: "imm_1", category: "免疫・アレルギー", front: "獲得免疫(適応免疫)を担う代表的な細胞は?", back: "T細胞・B細胞(リンパ球)" },
+  { id: "imm_2", category: "免疫・アレルギー", front: "ヘルパーT細胞(CD4陽性)の主な働きは?", back: "他の免疫細胞を活性化・調整する司令塔的役割" },
+  { id: "imm_3", category: "免疫・アレルギー", front: "細胞傷害性T細胞(CD8陽性)の主な働きは?", back: "ウイルス感染細胞やがん細胞を直接破壊する" },
+  { id: "imm_4", category: "免疫・アレルギー", front: "B細胞が最終分化し抗体を産生する細胞は?", back: "形質細胞" },
+  { id: "imm_5", category: "免疫・アレルギー", front: "マクロファージの主な機能は?", back: "貪食作用と抗原提示" },
+  { id: "imm_6", category: "免疫・アレルギー", front: "NK細胞の特徴は?", back: "抗原提示なしにウイルス感染細胞やがん細胞を攻撃できる自然免疫細胞" },
+  { id: "imm_7", category: "免疫・アレルギー", front: "補体系の主な役割は?", back: "病原体の破壊・オプソニン化・炎症反応の促進" },
+  { id: "imm_8", category: "免疫・アレルギー", front: "サイトカインとは何か?", back: "免疫細胞間の情報伝達を担うタンパク質(インターロイキン等)" },
+  { id: "imm_9", category: "免疫・アレルギー", front: "自己と非自己を認識する主要組織適合抗原複合体の略称は?", back: "MHC(ヒトではHLA)" },
+  { id: "imm_10", category: "免疫・アレルギー", front: "免疫グロブリンの5つのクラスは?", back: "IgG・IgA・IgM・IgD・IgE" },
+  { id: "imm_11", category: "免疫・アレルギー", front: "胎盤を通過できる唯一の免疫グロブリンは?", back: "IgG" },
+  { id: "imm_12", category: "免疫・アレルギー", front: "感染初期に最初に上昇する抗体は?", back: "IgM" },
+  { id: "imm_13", category: "免疫・アレルギー", front: "I型アレルギーに関与する免疫グロブリンは?", back: "IgE" },
+  { id: "imm_14", category: "免疫・アレルギー", front: "母乳や粘膜面で防御的に働く免疫グロブリンは?", back: "IgA" },
+  { id: "imm_15", category: "免疫・アレルギー", front: "I型アレルギー(即時型)の代表疾患は?", back: "アナフィラキシー・気管支喘息・花粉症・食物アレルギー" },
+  { id: "imm_16", category: "免疫・アレルギー", front: "I型アレルギーの主な機序は?", back: "IgEが肥満細胞に結合し、抗原と反応してヒスタミン等を放出する" },
+  { id: "imm_17", category: "免疫・アレルギー", front: "II型アレルギー(細胞傷害型)の代表疾患は?", back: "自己免疫性溶血性貧血・血液型不適合輸血反応" },
+  { id: "imm_18", category: "免疫・アレルギー", front: "III型アレルギー(免疫複合体型)の代表疾患は?", back: "全身性エリテマトーデス(SLE)・血清病" },
+  { id: "imm_19", category: "免疫・アレルギー", front: "IV型アレルギー(遅延型)の代表疾患は?", back: "ツベルクリン反応・接触性皮膚炎(金属アレルギー等)" },
+  { id: "imm_20", category: "免疫・アレルギー", front: "IV型アレルギーに関与する主体は?", back: "T細胞(抗体を介さない細胞性免疫反応)" },
+  { id: "imm_21", category: "免疫・アレルギー", front: "アナフィラキシーショック時の第一選択薬は?", back: "アドレナリン(エピネフリン)の筋肉注射" },
+  { id: "imm_22", category: "免疫・アレルギー", front: "アナフィラキシーの主な症状は?", back: "血圧低下・呼吸困難・蕁麻疹・意識障害などが急速に出現する" },
+  { id: "imm_23", category: "免疫・アレルギー", front: "気管支喘息の発作時に聴取される特徴的な呼吸音は?", back: "呼気時のwheeze(笛声音)" },
+  { id: "imm_24", category: "免疫・アレルギー", front: "アトピー性皮膚炎の主な病態は?", back: "皮膚バリア機能低下とIgEを介したアレルギー炎症による慢性疾患" },
+  { id: "imm_25", category: "免疫・アレルギー", front: "食物アレルギーで特に注意すべき3大アレルゲンは?", back: "卵・乳・小麦" },
+  { id: "imm_26", category: "免疫・アレルギー", front: "アレルギー性鼻炎の三大症状は?", back: "くしゃみ・鼻汁・鼻閉" },
+  { id: "imm_27", category: "免疫・アレルギー", front: "蕁麻疹の病態生理は?", back: "肥満細胞からのヒスタミン遊離による血管透過性亢進(膨疹)" },
+  { id: "imm_28", category: "免疫・アレルギー", front: "造影剤アレルギーの既往がある患者への対応は?", back: "事前申告の確認と代替検査の検討、緊急時対応の準備" },
+  { id: "imm_29", category: "免疫・アレルギー", front: "全身性エリテマトーデス(SLE)に特徴的な顔面症状は?", back: "蝶形紅斑" },
+  { id: "imm_30", category: "免疫・アレルギー", front: "SLEで陽性となる代表的な自己抗体は?", back: "抗核抗体(ANA)、抗dsDNA抗体" },
+  { id: "imm_31", category: "免疫・アレルギー", front: "関節リウマチの特徴的な関節症状は?", back: "朝のこわばり、左右対称性の多関節炎" },
+  { id: "imm_32", category: "免疫・アレルギー", front: "関節リウマチで陽性となる代表的な抗体は?", back: "リウマトイド因子(RF)、抗CCP抗体" },
+  { id: "imm_33", category: "免疫・アレルギー", front: "シェーグレン症候群の主な症状は?", back: "乾燥性角結膜炎(ドライアイ)と口腔乾燥(ドライマウス)" },
+  { id: "imm_34", category: "免疫・アレルギー", front: "強皮症(全身性硬化症)の初期にみられる血管症状は?", back: "レイノー現象" },
+  { id: "imm_35", category: "免疫・アレルギー", front: "橋本病(慢性甲状腺炎)はどのような疾患か?", back: "甲状腺に対する自己免疫疾患で、甲状腺機能低下をきたすことが多い" },
+  { id: "imm_36", category: "免疫・アレルギー", front: "1型糖尿病の主な病態は?", back: "膵β細胞が自己免疫的に破壊され、インスリンが絶対的に欠乏する" },
+  { id: "imm_37", category: "免疫・アレルギー", front: "臓器移植後、移植片が宿主を攻撃する反応は?", back: "GVHD(移植片対宿主病)" },
+  { id: "imm_38", category: "免疫・アレルギー", front: "移植拒絶反応を抑えるために用いる薬剤群は?", back: "免疫抑制剤(シクロスポリン・タクロリムスなど)" },
+  { id: "imm_39", category: "免疫・アレルギー", front: "移植直後(数分〜数時間)に起こる拒絶反応は?", back: "超急性拒絶反応" },
+  { id: "imm_40", category: "免疫・アレルギー", front: "HIVが主に破壊する免疫細胞は?", back: "CD4陽性ヘルパーT細胞" },
+  { id: "imm_41", category: "免疫・アレルギー", front: "HIV感染がAIDS発症に至った状態とは?", back: "日和見感染症などの指標疾患を発症した状態" },
+  { id: "imm_42", category: "免疫・アレルギー", front: "ステロイド長期投与で起こりやすい免疫関連の問題は?", back: "免疫抑制による易感染性" },
+  { id: "imm_43", category: "免疫・アレルギー", front: "一次性(先天性)免疫不全症の例は?", back: "重症複合免疫不全症(SCID)" },
+  { id: "imm_44", category: "免疫・アレルギー", front: "アレルギーの原因抗原を調べる血液検査は?", back: "特異的IgE抗体検査(RASTなど)" },
+  { id: "imm_45", category: "免疫・アレルギー", front: "I型アレルギーのスクリーニングで測定される総量指標は?", back: "血清総IgE値" },
+  { id: "imm_46", category: "免疫・アレルギー", front: "アレルギーの原因を皮膚反応で調べる検査は?", back: "皮膚プリックテスト・パッチテスト" },
+  { id: "imm_47", category: "免疫・アレルギー", front: "アレルギー症状に対して第一選択となる内服薬は?", back: "抗ヒスタミン薬" },
+  { id: "imm_48", category: "免疫・アレルギー", front: "関節リウマチ治療の中心となる薬剤群(メトトレキサート等)は?", back: "抗リウマチ薬(DMARDs)" },
+  { id: "imm_49", category: "免疫・アレルギー", front: "自己免疫疾患やアレルギーの炎症を強力に抑える薬剤は?", back: "副腎皮質ステロイド" },
+];
+
+const CATEGORY_ORDER = ["解剖生理","バイタル","検査値","疾病","薬理","感染対策","社会保障","母性","精神","老年","免疫・アレルギー"];
+const STORAGE_KEY = "nq_flashcards_v2";
+const TEST_KEY = "nq_flashcards_probe";
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function toBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  bytes.forEach((b) => { bin += String.fromCharCode(b); });
+  return btoa(bin);
+}
+
+function fromBase64(b64) {
+  const bin = atob(b64);
+  const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+function probeLocalStorage() {
+  try {
+    localStorage.setItem(TEST_KEY, "1");
+    const ok = localStorage.getItem(TEST_KEY) === "1";
+    localStorage.removeItem(TEST_KEY);
+    return ok;
+  } catch (e) {
+    return false;
+  }
+}
+
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || data.v !== 2) return null;
+    return data;
+  } catch (e) {
+    return null;
+  }
+}
+
+function App() {
+  const [storageMode, setStorageMode] = useState("checking"); // checking | auto | manual
+  const [lastSaved, setLastSaved] = useState(null);
+  const [saveError, setSaveError] = useState(false);
+
+  const [learnedIds, setLearnedIds] = useState(() => new Set());
+  const [userCards, setUserCards] = useState([]);
+  const [deletedIds, setDeletedIds] = useState(() => new Set());
+  const [hydrated, setHydrated] = useState(false);
+
+  const [mode, setMode] = useState("all"); // all | unlearned | category
+  const [activeCategory, setActiveCategory] = useState(CATEGORY_ORDER[0]);
+  const [order, setOrder] = useState([]);
+  const [cursor, setCursor] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+
+  const [showAdd, setShowAdd] = useState(false);
+  const [showBackup, setShowBackup] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState(null);
+  const [toast, setToast] = useState("");
+
+  const toastTimer = useRef(null);
+  const showToast = useCallback((msg) => {
+    setToast(msg);
+    clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(""), 2200);
+  }, []);
+
+  // startup: connectivity probe, then hydrate
+  useEffect(() => {
+    const ok = probeLocalStorage();
+    if (ok) {
+      const saved = loadSaved();
+      if (saved) {
+        setLearnedIds(new Set(saved.learned || []));
+        setUserCards(Array.isArray(saved.user) ? saved.user : []);
+        setDeletedIds(new Set(saved.deleted || []));
+      }
+      setStorageMode("auto");
+      setLastSaved(saved ? true : null);
+    } else {
+      setStorageMode("manual");
+    }
+    setHydrated(true);
+  }, []);
+
+  // autosave (debounced), auto mode only
+  useEffect(() => {
+    if (!hydrated || storageMode !== "auto") return;
+    const t = setTimeout(() => {
+      try {
+        const payload = {
+          v: 2,
+          learned: [...learnedIds],
+          user: userCards,
+          deleted: [...deletedIds],
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        setLastSaved(new Date());
+        setSaveError(false);
+      } catch (e) {
+        setSaveError(true);
+      }
+    }, 600);
+    return () => clearTimeout(t);
+  }, [learnedIds, userCards, deletedIds, hydrated, storageMode]);
+
+  const activeCards = useMemo(() => {
+    const preset = PRESET_CARDS.filter((c) => !deletedIds.has(c.id));
+    return [...preset, ...userCards];
+  }, [deletedIds, userCards]);
+
+  const filteredCards = useMemo(() => {
+    if (mode === "all") return activeCards;
+    if (mode === "unlearned") return activeCards.filter((c) => !learnedIds.has(c.id));
+    return activeCards.filter((c) => c.category === activeCategory);
+  }, [mode, activeCategory, activeCards, learnedIds]);
+
+  // rebuild queue order whenever the filter set changes in composition
+  const filteredKey = useMemo(() => filteredCards.map((c) => c.id).join(","), [filteredCards]);
+  useEffect(() => {
+    setOrder(filteredCards.map((c) => c.id));
+    setCursor(0);
+    setFlipped(false);
+  }, [filteredKey]);
+
+  const currentId = order[cursor];
+  const currentCard = useMemo(
+    () => activeCards.find((c) => c.id === currentId) || null,
+    [activeCards, currentId]
+  );
+
+  const total = activeCards.length;
+  const learnedCount = activeCards.filter((c) => learnedIds.has(c.id)).length;
+
+  function goNext() {
+    setFlipped(false);
+    setCursor((c) => (order.length ? (c + 1) % order.length : 0));
+  }
+  function goPrev() {
+    setFlipped(false);
+    setCursor((c) => (order.length ? (c - 1 + order.length) % order.length : 0));
+  }
+  function markLearned(value) {
+    if (!currentCard) return;
+    setLearnedIds((prev) => {
+      const next = new Set(prev);
+      if (value) next.add(currentCard.id); else next.delete(currentCard.id);
+      return next;
+    });
+    goNext();
+  }
+  function reshuffle() {
+    setOrder((o) => shuffle(o));
+    setCursor(0);
+    setFlipped(false);
+    showToast("シャッフルしました");
+  }
+
+  function addCard(front, back, category) {
+    const card = { id: "user_" + Date.now() + "_" + Math.floor(Math.random() * 1000), category, front, back };
+    setUserCards((prev) => [...prev, card]);
+    setShowAdd(false);
+    showToast("カードを追加しました");
+  }
+
+  function confirmDeleteCurrent() {
+    if (!currentCard) return;
+    setPendingDelete(currentCard);
+  }
+  function performDelete() {
+    const card = pendingDelete;
+    if (!card) return;
+    if (card.id.startsWith("user_")) {
+      setUserCards((prev) => prev.filter((c) => c.id !== card.id));
+    } else {
+      setDeletedIds((prev) => new Set(prev).add(card.id));
+    }
+    setLearnedIds((prev) => {
+      const next = new Set(prev);
+      next.delete(card.id);
+      return next;
+    });
+    setPendingDelete(null);
+    showToast("カードを削除しました");
+  }
+
+  function performReset() {
+    setLearnedIds(new Set());
+    setShowResetConfirm(false);
+    showToast("進捗をリセットしました");
+  }
+
+  const backupCode = useMemo(() => {
+    const payload = { v: 2, learned: [...learnedIds], user: userCards, deleted: [...deletedIds] };
+    return toBase64(JSON.stringify(payload));
+  }, [learnedIds, userCards, deletedIds]);
+
+  function restoreFromCode(code) {
+    try {
+      const json = fromBase64(code.trim());
+      const data = JSON.parse(json);
+      if (!data || data.v !== 2) throw new Error("bad version");
+      setLearnedIds(new Set(data.learned || []));
+      setUserCards(Array.isArray(data.user) ? data.user : []);
+      setDeletedIds(new Set(data.deleted || []));
+      showToast("復元しました");
+      setShowBackup(false);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function retryStorage() {
+    const ok = probeLocalStorage();
+    if (ok) {
+      setStorageMode("auto");
+      setSaveError(false);
+      showToast("自動保存が有効になりました");
+    } else {
+      showToast("まだ接続できません");
+    }
+  }
+
+  if (!hydrated) return null;
+
+  return (
+    <div className="app-shell">
+      <div className="brand">
+        <div>
+          <p className="brand-title">国試単語帳</p>
+          <div className="brand-sub">2027.02 看護師国家試験対策</div>
+        </div>
+        <StatusPill mode={storageMode} lastSaved={lastSaved} error={saveError} onClick={() => setShowBackup(true)} />
+      </div>
+
+      {storageMode === "manual" && (
+        <div className="mode-banner">
+          <span className="glyph">✎</span>
+          <span>
+            この端末では自動保存が使えないため、手動バックアップモードで動いています。学習が進んだら右上の状態アイコンからバックアップコードをコピーして保管してください。
+          </span>
+        </div>
+      )}
+
+      <div className="progress-card">
+        <div className="progress-row">
+          <span>{modeLabel(mode, activeCategory)}の進捗</span>
+          <span><strong>{learnedCount}</strong> / {total}</span>
+        </div>
+        <div className="progress-track">
+          <div className="progress-fill" style={{ width: (total ? (learnedCount / total) * 100 : 0) + "%" }} />
+        </div>
+      </div>
+
+      <div className="mode-tabs">
+        <button className={"mode-tab" + (mode === "all" ? " active" : "")} onClick={() => setMode("all")}>すべて</button>
+        <button className={"mode-tab" + (mode === "unlearned" ? " active" : "")} onClick={() => setMode("unlearned")}>未習得のみ</button>
+        <button className={"mode-tab" + (mode === "category" ? " active" : "")} onClick={() => setMode("category")}>カテゴリ別</button>
+      </div>
+
+      {mode === "category" && (
+        <div className="chip-row">
+          {CATEGORY_ORDER.map((cat) => (
+            <button
+              key={cat}
+              className={"chip" + (activeCategory === cat ? " active" : "")}
+              onClick={() => setActiveCategory(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="stage">
+        {currentCard ? (
+          <>
+            <div className="card-scene">
+              <div className={"card-flip" + (flipped ? " flipped" : "")} onClick={() => setFlipped((f) => !f)}>
+                <div className="card-face card-front">
+                  {learnedIds.has(currentCard.id) && <span className="learned-badge">覚えた</span>}
+                  <div className="card-eyebrow">
+                    <span className="card-tag">{currentCard.category}</span>
+                    <span className="deck-position">{order.length ? cursor + 1 : 0} / {order.length}</span>
+                  </div>
+                  <div className="card-body"><p className="card-text">{currentCard.front}</p></div>
+                  <div className="card-hint">タップして答えを見る</div>
+                </div>
+                <div className="card-face card-back">
+                  <div className="card-eyebrow">
+                    <span className="card-tag">{currentCard.category}</span>
+                    <span className="card-label">ANSWER</span>
+                  </div>
+                  <div className="card-body"><p className="card-text">{currentCard.back}</p></div>
+                  <div className="card-hint">タップして表に戻る</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="judge-row">
+              <button className="judge-btn pending" onClick={() => markLearned(false)}>まだ</button>
+              <button className="judge-btn learned" onClick={() => markLearned(true)}>覚えた</button>
+            </div>
+
+            <div className="nav-row">
+              <button className="icon-btn" onClick={goPrev} aria-label="前のカード">‹</button>
+              <button className="icon-btn" onClick={reshuffle} aria-label="シャッフル">⤮</button>
+              <button className="icon-btn" onClick={confirmDeleteCurrent} aria-label="このカードを削除">🗑</button>
+              <button className="icon-btn" onClick={goNext} aria-label="次のカード">›</button>
+            </div>
+          </>
+        ) : (
+          <div className="empty-state">
+            <div className="big">{total === 0 ? "カードがありません" : "すべて覚えました 🎉"}</div>
+            <div>{total === 0 ? "「追加」からカードを作成してください" : "モードを切り替えて他のカードも復習しましょう"}</div>
+          </div>
+        )}
+      </div>
+
+      <div className="footer-actions">
+        <button className="ghost-btn" onClick={() => setShowAdd(true)}><span className="glyph">＋</span>追加</button>
+        <button className="ghost-btn" onClick={() => setShowBackup(true)}><span className="glyph">💾</span>バックアップ</button>
+        <button className="ghost-btn" onClick={() => setShowResetConfirm(true)}><span className="glyph">↺</span>進捗リセット</button>
+      </div>
+
+      {showAdd && <AddCardModal onClose={() => setShowAdd(false)} onSave={addCard} />}
+
+      {showBackup && (
+        <BackupModal
+          storageMode={storageMode}
+          lastSaved={lastSaved}
+          saveError={saveError}
+          code={backupCode}
+          onRetry={retryStorage}
+          onRestore={restoreFromCode}
+          onClose={() => setShowBackup(false)}
+          showToast={showToast}
+        />
+      )}
+
+      {showResetConfirm && (
+        <ConfirmModal
+          title="進捗をリセットしますか?"
+          desc="すべてのカードが「まだ」の状態に戻ります。この操作は取り消せません。"
+          confirmLabel="リセットする"
+          onConfirm={performReset}
+          onCancel={() => setShowResetConfirm(false)}
+        />
+      )}
+
+      {pendingDelete && (
+        <ConfirmModal
+          title="このカードを削除しますか?"
+          desc={"「" + pendingDelete.front + "」を削除します。この操作は取り消せません。"}
+          confirmLabel="削除する"
+          onConfirm={performDelete}
+          onCancel={() => setPendingDelete(null)}
+        />
+      )}
+
+      {toast && <div className="toast">{toast}</div>}
+    </div>
+  );
+}
+
+function modeLabel(mode, category) {
+  if (mode === "unlearned") return "未習得のみ";
+  if (mode === "category") return category;
+  return "全体";
+}
+
+function StatusPill({ mode, lastSaved, error, onClick }) {
+  let dot = "ok", label = "確認中";
+  if (mode === "checking") { dot = "warn"; label = "確認中"; }
+  else if (mode === "manual") { dot = "warn"; label = "手動保存"; }
+  else if (error) { dot = "bad"; label = "保存失敗"; }
+  else { dot = "ok"; label = "自動保存"; }
+  return (
+    <button className="status-pill" onClick={onClick}>
+      <span className={"status-dot " + dot}></span>
+      {label}
+    </button>
+  );
+}
+
+function AddCardModal({ onClose, onSave }) {
+  const [front, setFront] = useState("");
+  const [back, setBack] = useState("");
+  const [category, setCategory] = useState(CATEGORY_ORDER[0]);
+  const canSave = front.trim().length > 0 && back.trim().length > 0;
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
+        <p className="modal-title">カードを追加</p>
+        <div>
+          <label className="field-label">カテゴリ</label>
+          <select value={category} onChange={(e) => setCategory(e.target.value)}>
+            {CATEGORY_ORDER.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="field-label">問題(表)</label>
+          <textarea rows="2" value={front} onChange={(e) => setFront(e.target.value)} placeholder="例: 播種性血管内凝固症候群の略称は?" />
+        </div>
+        <div>
+          <label className="field-label">答え(裏)</label>
+          <textarea rows="2" value={back} onChange={(e) => setBack(e.target.value)} placeholder="例: DIC" />
+        </div>
+        <div className="btn-row">
+          <button className="secondary-btn" onClick={onClose}>キャンセル</button>
+          <button className="primary-btn" disabled={!canSave} onClick={() => onSave(front.trim(), back.trim(), category)}>追加する</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BackupModal({ storageMode, lastSaved, saveError, code, onRetry, onRestore, onClose, showToast }) {
+  const [pasted, setPasted] = useState("");
+  const [restoreError, setRestoreError] = useState(false);
+
+  function copyCode() {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).then(
+        () => showToast("コピーしました"),
+        () => showToast("コピーに失敗しました")
+      );
+    } else {
+      showToast("このブラウザではコピーできません");
+    }
+  }
+
+  function tryRestore() {
+    const ok = onRestore(pasted);
+    setRestoreError(!ok);
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
+        <p className="modal-title">保存状態</p>
+
+        {storageMode === "auto" && !saveError && (
+          <p className="modal-desc">この端末では自動保存が有効です。学習状況は操作のたびに自動で保存されます。念のため、下のバックアップコードを控えておくと安心です。</p>
+        )}
+        {storageMode === "auto" && saveError && (
+          <>
+            <p className="modal-desc">直前の自動保存に失敗しました。下のコードを今すぐコピーして控えてから、再試行してください。</p>
+            <button className="secondary-btn" onClick={onRetry}>再試行する</button>
+          </>
+        )}
+        {storageMode === "manual" && (
+          <>
+            <p className="modal-desc">この端末では自動保存が使えません。下のコードをコピーしてメモアプリ等に保管し、次回はここに貼り付けて復元してください。</p>
+            <button className="secondary-btn" onClick={onRetry}>自動保存を再確認</button>
+          </>
+        )}
+
+        <div>
+          <label className="field-label">バックアップコード</label>
+          <div className="code-box">{code}</div>
+        </div>
+        <button className="primary-btn" onClick={copyCode}>コードをコピー</button>
+
+        <div style={{ borderTop: "1px solid var(--border)", paddingTop: 14 }}>
+          <label className="field-label">コードから復元</label>
+          <textarea rows="3" value={pasted} onChange={(e) => { setPasted(e.target.value); setRestoreError(false); }} placeholder="保存しておいたコードを貼り付け" />
+          {restoreError && <p className="modal-desc" style={{ color: "var(--danger)" }}>コードを読み取れませんでした。貼り付けた内容を確認してください。</p>}
+          <div className="btn-row" style={{ marginTop: 10 }}>
+            <button className="secondary-btn" onClick={onClose}>閉じる</button>
+            <button className="primary-btn" disabled={!pasted.trim()} onClick={tryRestore}>復元する</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ConfirmModal({ title, desc, confirmLabel, onConfirm, onCancel }) {
+  return (
+    <div className="modal-backdrop" onClick={onCancel}>
+      <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
+        <p className="modal-title">{title}</p>
+        <p className="modal-desc">{desc}</p>
+        <div className="btn-row">
+          <button className="secondary-btn" onClick={onCancel}>キャンセル</button>
+          <button className="danger-btn" onClick={onConfirm}>{confirmLabel}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+</script>
