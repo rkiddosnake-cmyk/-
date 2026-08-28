@@ -752,9 +752,17 @@ function loadSaved() {
   }
 }
 
+function formatTime(date) {
+  if (!(date instanceof Date)) return "";
+  const h = String(date.getHours()).padStart(2, "0");
+  const m = String(date.getMinutes()).padStart(2, "0");
+  return h + ":" + m;
+}
+
 function App() {
   const [storageMode, setStorageMode] = useState("checking"); // checking | auto | manual
   const [lastSaved, setLastSaved] = useState(null);
+  const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(false);
 
   const [learnedIds, setLearnedIds] = useState(() => new Set());
@@ -792,16 +800,17 @@ function App() {
         setDeletedIds(new Set(saved.deleted || []));
       }
       setStorageMode("auto");
-      setLastSaved(saved ? true : null);
     } else {
       setStorageMode("manual");
     }
     setHydrated(true);
   }, []);
 
-  // autosave (debounced), auto mode only
+  // autosave (debounced), auto mode only — tracks in-flight/success/failure so the
+  // header status always reflects whether the last change actually persisted.
   useEffect(() => {
     if (!hydrated || storageMode !== "auto") return;
+    setSaving(true);
     const t = setTimeout(() => {
       try {
         const payload = {
@@ -815,6 +824,8 @@ function App() {
         setSaveError(false);
       } catch (e) {
         setSaveError(true);
+      } finally {
+        setSaving(false);
       }
     }, 600);
     return () => clearTimeout(t);
@@ -947,7 +958,7 @@ function App() {
           <p className="brand-title">国試単語帳</p>
           <div className="brand-sub">2027.02 看護師国家試験対策</div>
         </div>
-        <StatusPill mode={storageMode} lastSaved={lastSaved} error={saveError} onClick={() => setShowBackup(true)} />
+        <StatusPill mode={storageMode} saving={saving} lastSaved={lastSaved} error={saveError} onClick={() => setShowBackup(true)} />
       </div>
 
       {storageMode === "manual" && (
@@ -1045,6 +1056,7 @@ function App() {
       {showBackup && (
         <BackupModal
           storageMode={storageMode}
+          saving={saving}
           lastSaved={lastSaved}
           saveError={saveError}
           code={backupCode}
@@ -1086,12 +1098,21 @@ function modeLabel(mode, category) {
   return "全体";
 }
 
-function StatusPill({ mode, lastSaved, error, onClick }) {
-  let dot = "ok", label = "確認中";
-  if (mode === "checking") { dot = "warn"; label = "確認中"; }
-  else if (mode === "manual") { dot = "warn"; label = "手動保存"; }
-  else if (error) { dot = "bad"; label = "保存失敗"; }
-  else { dot = "ok"; label = "自動保存"; }
+function StatusPill({ mode, saving, lastSaved, error, onClick }) {
+  let dot = "warn", label = "確認中";
+  if (mode === "checking") {
+    dot = "warn"; label = "確認中";
+  } else if (mode === "manual") {
+    dot = "warn"; label = "手動保存モード";
+  } else if (error) {
+    dot = "bad"; label = "保存失敗";
+  } else if (saving) {
+    dot = "warn"; label = "保存中…";
+  } else if (lastSaved instanceof Date) {
+    dot = "ok"; label = "保存済み " + formatTime(lastSaved);
+  } else {
+    dot = "ok"; label = "自動保存";
+  }
   return (
     <button className="status-pill" onClick={onClick}>
       <span className={"status-dot " + dot}></span>
@@ -1132,7 +1153,7 @@ function AddCardModal({ onClose, onSave }) {
   );
 }
 
-function BackupModal({ storageMode, lastSaved, saveError, code, onRetry, onRestore, onClose, showToast }) {
+function BackupModal({ storageMode, saving, lastSaved, saveError, code, onRetry, onRestore, onClose, showToast }) {
   const [pasted, setPasted] = useState("");
   const [restoreError, setRestoreError] = useState(false);
 
@@ -1158,7 +1179,15 @@ function BackupModal({ storageMode, lastSaved, saveError, code, onRetry, onResto
         <p className="modal-title">保存状態</p>
 
         {storageMode === "auto" && !saveError && (
-          <p className="modal-desc">この端末では自動保存が有効です。学習状況は操作のたびに自動で保存されます。念のため、下のバックアップコードを控えておくと安心です。</p>
+          <p className="modal-desc">
+            この端末では自動保存が有効です。学習状況は操作のたびに自動で保存されます。
+            {saving
+              ? " 現在保存中です…"
+              : lastSaved instanceof Date
+                ? " 最終保存: " + formatTime(lastSaved)
+                : " まだ保存された変更はありません。"}
+            {" "}念のため、下のバックアップコードを控えておくと安心です。
+          </p>
         )}
         {storageMode === "auto" && saveError && (
           <>
