@@ -706,6 +706,10 @@ const PRESET_CARDS = [
 const CATEGORY_ORDER = ["解剖生理","バイタル","検査値","疾病","薬理","感染対策","社会保障","母性","精神","老年","免疫・アレルギー"];
 const STORAGE_KEY = "nq_flashcards_v2";
 const TEST_KEY = "nq_flashcards_probe";
+const COOKIE_KEY = "nq_backup_v2";
+const TEST_COOKIE = "nq_flashcards_cprobe";
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 400; // 400 days (browser cap)
+const COOKIE_PAYLOAD_LIMIT = 3500; // stay well under the ~4KB cookie ceiling
 
 function shuffle(arr) {
   const a = arr.slice();
@@ -752,6 +756,61 @@ function loadSaved() {
   }
 }
 
+/* -----------------------------------------------------------------
+   Cookie mirror. Some hosting contexts sandbox localStorage away
+   without warning while leaving cookies reachable (or vice versa),
+   which is exactly the failure this app was reported to hit: a save
+   "succeeds" in-session but the data is gone on the next visit.
+   Writing every save through both channels means one flaking out
+   silently doesn't cost the user their progress.
+---------------------------------------------------------------- */
+function setCookie(name, value, maxAgeSeconds) {
+  document.cookie = name + "=" + encodeURIComponent(value) + "; path=/; max-age=" + maxAgeSeconds + "; SameSite=Lax";
+}
+
+function getCookie(name) {
+  const prefix = name + "=";
+  const parts = document.cookie ? document.cookie.split("; ") : [];
+  for (const part of parts) {
+    if (part.indexOf(prefix) === 0) return decodeURIComponent(part.slice(prefix.length));
+  }
+  return null;
+}
+
+function deleteCookie(name) {
+  document.cookie = name + "=; path=/; max-age=0";
+}
+
+function probeCookie() {
+  try {
+    setCookie(TEST_COOKIE, "1", 60);
+    const ok = getCookie(TEST_COOKIE) === "1";
+    deleteCookie(TEST_COOKIE);
+    return ok;
+  } catch (e) {
+    return false;
+  }
+}
+
+function loadCookieBackup() {
+  try {
+    const raw = getCookie(COOKIE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(fromBase64(raw));
+    if (!data || data.v !== 2) return null;
+    return data;
+  } catch (e) {
+    return null;
+  }
+}
+
+function writeCookieBackup(payloadJson) {
+  const b64 = toBase64(payloadJson);
+  if (encodeURIComponent(b64).length > COOKIE_PAYLOAD_LIMIT) return false;
+  setCookie(COOKIE_KEY, b64, COOKIE_MAX_AGE);
+  return true;
+}
+
 function formatTime(date) {
   if (!(date instanceof Date)) return "";
   const h = String(date.getHours()).padStart(2, "0");
@@ -761,6 +820,8 @@ function formatTime(date) {
 
 function App() {
   const [storageMode, setStorageMode] = useState("checking"); // checking | auto | manual
+  const [localAvailable, setLocalAvailable] = useState(false);
+  const [cookieAvailable, setCookieAvailable] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(false);
@@ -789,47 +850,68 @@ function App() {
     toastTimer.current = setTimeout(() => setToast(""), 2200);
   }, []);
 
-  // startup: connectivity probe, then hydrate
+  // startup: probe both storage channels, then hydrate from whichever has data.
+  // Reading from localStorage alone was found to silently lose data across a
+  // reopen in some hosting contexts, so a cookie mirror backs it up.
   useEffect(() => {
-    const ok = probeLocalStorage();
-    if (ok) {
-      const saved = loadSaved();
-      if (saved) {
-        setLearnedIds(new Set(saved.learned || []));
-        setUserCards(Array.isArray(saved.user) ? saved.user : []);
-        setDeletedIds(new Set(saved.deleted || []));
-      }
-      setStorageMode("auto");
-    } else {
-      setStorageMode("manual");
+    const localOk = probeLocalStorage();
+    const cookieOk = probeCookie();
+
+    let data = null;
+    let restoredFrom = null;
+    if (localOk) {
+      data = loadSaved();
+      if (data) restoredFrom = "local";
     }
+    if (!data && cookieOk) {
+      data = loadCookieBackup();
+      if (data) restoredFrom = "cookie";
+    }
+
+    if (data) {
+      setLearnedIds(new Set(data.learned || []));
+      setUserCards(Array.isArray(data.user) ? data.user : []);
+      setDeletedIds(new Set(data.deleted || []));
+    }
+
+    setLocalAvailable(localOk);
+    setCookieAvailable(cookieOk);
+    setStorageMode(localOk || cookieOk ? "auto" : "manual");
     setHydrated(true);
+
+    if (restoredFrom) {
+      const count = (data.learned || []).length + (data.user || []).length;
+      setTimeout(() => showToast("前回の学習データを復元しました(" + count + "件)"), 300);
+    }
   }, []);
 
-  // autosave (debounced), auto mode only — tracks in-flight/success/failure so the
-  // header status always reflects whether the last change actually persisted.
+  // autosave (debounced), auto mode only — writes through every available channel
+  // and only reports success once at least one of them actually accepted the write,
+  // so the header status reflects whether the change really persisted.
   useEffect(() => {
     if (!hydrated || storageMode !== "auto") return;
     setSaving(true);
     const t = setTimeout(() => {
-      try {
-        const payload = {
-          v: 2,
-          learned: [...learnedIds],
-          user: userCards,
-          deleted: [...deletedIds],
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-        setLastSaved(new Date());
-        setSaveError(false);
-      } catch (e) {
-        setSaveError(true);
-      } finally {
-        setSaving(false);
+      const payload = {
+        v: 2,
+        learned: [...learnedIds],
+        user: userCards,
+        deleted: [...deletedIds],
+      };
+      const json = JSON.stringify(payload);
+      let ok = false;
+      if (localAvailable) {
+        try { localStorage.setItem(STORAGE_KEY, json); ok = true; } catch (e) { /* fall through to cookie */ }
       }
+      if (cookieAvailable) {
+        try { if (writeCookieBackup(json)) ok = true; } catch (e) { /* local may still have succeeded */ }
+      }
+      setSaveError(!ok);
+      if (ok) setLastSaved(new Date());
+      setSaving(false);
     }, 600);
     return () => clearTimeout(t);
-  }, [learnedIds, userCards, deletedIds, hydrated, storageMode]);
+  }, [learnedIds, userCards, deletedIds, hydrated, storageMode, localAvailable, cookieAvailable]);
 
   const activeCards = useMemo(() => {
     const preset = PRESET_CARDS.filter((c) => !deletedIds.has(c.id));
@@ -939,8 +1021,11 @@ function App() {
   }
 
   function retryStorage() {
-    const ok = probeLocalStorage();
-    if (ok) {
+    const localOk = probeLocalStorage();
+    const cookieOk = probeCookie();
+    setLocalAvailable(localOk);
+    setCookieAvailable(cookieOk);
+    if (localOk || cookieOk) {
       setStorageMode("auto");
       setSaveError(false);
       showToast("自動保存が有効になりました");
