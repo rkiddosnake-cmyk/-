@@ -1,5 +1,5 @@
 <title>国試単語帳</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -95,7 +95,7 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    padding: 14px 16px 28px;
+    padding: calc(14px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));
     gap: 14px;
   }
 
@@ -573,7 +573,7 @@
 
   .toast {
     position: fixed;
-    bottom: 18px;
+    bottom: calc(18px + env(safe-area-inset-bottom));
     left: 50%;
     transform: translateX(-50%);
     background: var(--accent-strong);
