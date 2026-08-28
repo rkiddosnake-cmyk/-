@@ -276,6 +276,7 @@
     flex-direction: column;
     box-shadow: var(--shadow);
     border: 1px solid var(--border);
+    overflow: hidden;
   }
 
   .card-front {
@@ -321,6 +322,8 @@
     justify-content: center;
     text-align: center;
     padding: 10px 4px;
+    min-height: 0;
+    overflow-y: auto;
   }
 
   .card-text {
@@ -1041,7 +1044,7 @@ function App() {
       <div className="brand">
         <div>
           <p className="brand-title">国試単語帳</p>
-          <div className="brand-sub">2027.02 看護師国家試験対策 ・build4</div>
+          <div className="brand-sub">2027.02 看護師国家試験対策</div>
         </div>
         <StatusPill mode={storageMode} saving={saving} lastSaved={lastSaved} error={saveError} onClick={() => setShowBackup(true)} />
       </div>
