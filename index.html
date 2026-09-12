@@ -627,7 +627,8 @@
 const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
 /* ---------------------------------------------------------------
-   Preset data. IDs are permanent: seed_0..seed_30, imm_0..imm_49.
+   Preset data. IDs are permanent: seed_0..seed_30, imm_0..imm_49,
+   must_0..must_49 (第115回必修問題: must_0-24 午前, must_25-49 午後).
    Never renumber existing ids; append new preset cards at the end.
 ---------------------------------------------------------------- */
 const PRESET_CARDS = [
@@ -713,9 +714,63 @@ const PRESET_CARDS = [
   { id: "imm_47", category: "免疫・アレルギー", front: "アレルギー症状に対して第一選択となる内服薬は?", back: "抗ヒスタミン薬" },
   { id: "imm_48", category: "免疫・アレルギー", front: "関節リウマチ治療の中心となる薬剤群(メトトレキサート等)は?", back: "抗リウマチ薬(DMARDs)" },
   { id: "imm_49", category: "免疫・アレルギー", front: "自己免疫疾患やアレルギーの炎症を強力に抑える薬剤は?", back: "副腎皮質ステロイド" },
+
+  /* 第115回(令和8年2月)看護師国家試験 必修問題 午前1〜25 */
+  { id: "must_0", category: "必修問題", front: "令和5年推計による日本の将来推計人口で、令和42年(2060年)の人口はおよそどれくらいか?", back: "約9,600万人" },
+  { id: "must_1", category: "必修問題", front: "「令和4年中における自殺の状況」で、自殺者の原因・動機として最も多いのは?", back: "健康問題" },
+  { id: "must_2", category: "必修問題", front: "レム睡眠の特徴は?", back: "急速な眼球運動を伴う(骨格筋は弛緩する)" },
+  { id: "must_3", category: "必修問題", front: "土壌中に分布し、感染を引き起こす菌は?", back: "破傷風菌" },
+  { id: "must_4", category: "必修問題", front: "居宅サービス計画〈ケアプラン〉の作成を業務とするのは?", back: "介護支援専門員(ケアマネジャー)" },
+  { id: "must_5", category: "必修問題", front: "マズローの基本的欲求の階層で、集団の一員でありたいという欲求は?", back: "所属と愛の欲求" },
+  { id: "must_6", category: "必修問題", front: "ダウン症候群の原因となる染色体は?", back: "21番染色体(21トリソミー)" },
+  { id: "must_7", category: "必修問題", front: "乳幼児期の手先の運動で、最も早くできるようになるのは?", back: "ガラガラを握る" },
+  { id: "must_8", category: "必修問題", front: "乳児期と比べて学童期にみられる身体生理機能の変化は?", back: "血圧の上昇" },
+  { id: "must_9", category: "必修問題", front: "令和4年の国民生活基礎調査で、世帯総数における核家族世帯の割合は?", back: "約60%" },
+  { id: "must_10", category: "必修問題", front: "止血機構を有する体液は?", back: "血漿(凝固因子を含む)" },
+  { id: "must_11", category: "必修問題", front: "胃潰瘍による少量の吐血の特徴は?", back: "コーヒー残渣様" },
+  { id: "must_12", category: "必修問題", front: "胆嚢炎でみられる腹痛の典型的な部位は?", back: "右季肋部" },
+  { id: "must_13", category: "必修問題", front: "深部静脈血栓症〈DVT〉の危険因子は?", back: "長期臥床" },
+  { id: "must_14", category: "必修問題", front: "肝性脳症の原因物質は?", back: "アンモニア" },
+  { id: "must_15", category: "必修問題", front: "腰椎穿刺で適切な体位は?", back: "側臥位で膝を抱え、背中を丸めた体位(エビのような姿勢)" },
+  { id: "must_16", category: "必修問題", front: "免疫抑制作用をもつ薬剤は?", back: "副腎皮質ステロイド" },
+  { id: "must_17", category: "必修問題", front: "誤嚥のリスクがある患者の食事援助で適切な姿勢は?", back: "食事中は頸部前屈位をとる" },
+  { id: "must_18", category: "必修問題", front: "医療者間のコミュニケーションエラーを防ぐために適切なのは?", back: "伝えられた情報の内容を復唱し、確認し合う" },
+  { id: "must_19", category: "必修問題", front: "接触感染予防策として使用するのは?", back: "ガウン(手袋とともに着用する)" },
+  { id: "must_20", category: "必修問題", front: "静脈血採血で針を刺入した直後に、しびれの有無を確認する目的は?", back: "神経損傷の予防" },
+  { id: "must_21", category: "必修問題", front: "酸素投与器具で、最も高濃度の酸素を吸入できるのは?", back: "リザーバー付きマスク" },
+  { id: "must_22", category: "必修問題", front: "包帯法で前腕部を固定した場合の観察項目で適切なのは?", back: "末梢冷感の有無(循環障害の観察)" },
+  { id: "must_23", category: "必修問題", front: "がん性疼痛に使用する強オピオイド鎮痛薬は?", back: "モルヒネ" },
+  { id: "must_24", category: "必修問題", front: "対光反射に関与する脳神経は?", back: "動眼神経" },
+
+  /* 第115回(令和8年2月)看護師国家試験 必修問題 午後1〜25 */
+  { id: "must_25", category: "必修問題", front: "令和4年の国民生活基礎調査で、男性の有訴者の症状で最も多いのは?", back: "腰痛" },
+  { id: "must_26", category: "必修問題", front: "要介護認定を行うのは?", back: "市町村" },
+  { id: "must_27", category: "必修問題", front: "介護保険制度における、最も高い自己負担割合は?", back: "3割" },
+  { id: "must_28", category: "必修問題", front: "患者が治療について十分な説明を受け、自己決定する権利の行使を支えるのは?", back: "インフォームド・コンセント" },
+  { id: "must_29", category: "必修問題", front: "看護師等の人材確保の促進に関する法律で、都道府県ナースセンターの業務は?", back: "看護師等への無料の職業紹介" },
+  { id: "must_30", category: "必修問題", front: "胎児の卵円孔の位置は?", back: "右心房と左心房の間" },
+  { id: "must_31", category: "必修問題", front: "日本版デンバー式発達スクリーニング検査で、90%の乳児の首がすわる月齢は?", back: "4か月" },
+  { id: "must_32", category: "必修問題", front: "壮年期の身体的変化は?", back: "基礎代謝の低下" },
+  { id: "must_33", category: "必修問題", front: "結晶性知能にあたるのは?", back: "よく利用する病院から自宅への近道を考える(経験や知識に基づく能力)" },
+  { id: "must_34", category: "必修問題", front: "チーム医療で適切なのは?", back: "チームメンバー間で目標を共有する" },
+  { id: "must_35", category: "必修問題", front: "摂食中枢が存在する部位は?", back: "視床下部" },
+  { id: "must_36", category: "必修問題", front: "脊髄神経で頸神経の対の数は?", back: "8対" },
+  { id: "must_37", category: "必修問題", front: "感覚性言語中枢は?", back: "ウェルニッケ〈Wernicke〉野" },
+  { id: "must_38", category: "必修問題", front: "心房細動について正しいのは?", back: "心房内に血栓を形成しやすい" },
+  { id: "must_39", category: "必修問題", front: "成人の乏尿の定義は?", back: "1日の尿量が400mL以下" },
+  { id: "must_40", category: "必修問題", front: "糸球体濾過機能を評価する項目は?", back: "クレアチニンクリアランス" },
+  { id: "must_41", category: "必修問題", front: "痛風の診断に用いる血液検査データは?", back: "尿酸" },
+  { id: "must_42", category: "必修問題", front: "面接技法で「閉じた質問〈closed question〉」にあたるのは?", back: "「背中の痛みはないですか」など、はい・いいえで答えられる質問" },
+  { id: "must_43", category: "必修問題", front: "看護過程で、収集した情報を「分析」した結果にあたるのは?", back: "易感染状態(白血球の値などのデータから導いた判断)" },
+  { id: "must_44", category: "必修問題", front: "チェーン・ストークス呼吸の特徴は?", back: "無呼吸と、深さが周期的に増減する呼吸を繰り返す" },
+  { id: "must_45", category: "必修問題", front: "筋肉内注射を行う部位で適切なのは?", back: "三角筋" },
+  { id: "must_46", category: "必修問題", front: "成人の口腔内吸引で正しいのは?", back: "挿入時は吸引圧をかけない" },
+  { id: "must_47", category: "必修問題", front: "舌根の沈下を防止する体位は?", back: "側臥位" },
+  { id: "must_48", category: "必修問題", front: "徒手筋力テスト〈MMT〉で筋力が一番強い段階は?", back: "5" },
+  { id: "must_49", category: "必修問題", front: "全身性けいれん発作を起こしている患者に優先して行うのは?", back: "気道確保" },
 ];
 
-const CATEGORY_ORDER = ["解剖生理","バイタル","検査値","疾病","薬理","感染対策","社会保障","母性","精神","老年","免疫・アレルギー"];
+const CATEGORY_ORDER = ["必修問題","解剖生理","バイタル","検査値","疾病","薬理","感染対策","社会保障","母性","精神","老年","免疫・アレルギー"];
 const STORAGE_KEY = "nq_flashcards_v2";
 const TEST_KEY = "nq_flashcards_probe";
 const COOKIE_KEY = "nq_backup_v2";
